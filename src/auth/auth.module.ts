@@ -8,9 +8,7 @@ import { User, UserSchema } from './../../schemas/user.schema';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET_KEY
-    }),
+    JwtModule.register({}),
     MongooseModule.forFeature([
       {
         name: User.name,
