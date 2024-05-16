@@ -1,7 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, InternalServerErrorException, Post, Res, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './../services/auth.service';
-import { loginBody, signupBody } from './../interfaces/auth.interface';
 import { loginDTO, signupDTO } from '../dto/auth.dto';
+import { Response } from 'express';
+import { COOKIE_NAMES } from '../enums/auth.enums';
 
 @Controller('auth')
 export class AuthController {
@@ -10,16 +11,32 @@ export class AuthController {
   ) { }
 
   @Post('/login')
-  async loging(@Body() body: loginDTO) {
-    const createNewUser = await this.authService.login(body.email, body.password);
-    return createNewUser;
+  async loging(@Body() body: loginDTO, @Res({ passthrough: true }) res: Response) {
+    try {
+      const createNewUser = await this.authService.login(body.email, body.password);
+      if (createNewUser.success) {
+        res.cookie(COOKIE_NAMES.TOKEN, createNewUser.data);
+        return createNewUser;
+      }
+      throw new UnauthorizedException();
+    } catch (err: unknown) {
+      throw new InternalServerErrorException();
+    }
+
   }
 
 
   @Post('/signup')
-  async signup(@Body() body: signupDTO) {
-    const createNewUser = await this.authService.signup(body.email, body.password);
-    return createNewUser;
+  async signup(@Body() body: signupDTO, @Res({ passthrough: true }) res: Response) {
+    try {
+      const createNewUser = await this.authService.signup(body.email, body.password);
+      if (createNewUser.success) {
+        res.cookie(COOKIE_NAMES.TOKEN, createNewUser.data);
+      }
+      return createNewUser;
+    } catch (err: unknown) {
+      throw new InternalServerErrorException();
+    }
   }
 
 
