@@ -1,1 +1,3 @@
-export class CreateShorterDto {}
+export class CreateShorterDto {
+
+}
