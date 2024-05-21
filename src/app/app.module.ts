@@ -6,15 +6,29 @@ import { ShorterModule } from '../shorter/shorter.module';
 import { TicketingModule } from '../ticketing/ticketing.module';
 import { AuthModule } from '../auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import mongodbConfig from 'configs/mongodb.config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from 'schemas/user.schema';
+import mongodbConfig from 'configs/mongodb.config';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env.development', '.env.test', '.env.production'],
+      envFilePath: ['.env', '.env.development'],
       load: [mongodbConfig],
       isGlobal: true
+    }),
+    TodoModule,
+    ShorterModule,
+    TicketingModule,
+    AuthModule,
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          uri: configService.get<string>('MONGO_URL')
+        };
+      },
+      inject: [ConfigService]
     }),
     MongooseModule.forFeature([
       {
@@ -22,11 +36,6 @@ import { User, UserSchema } from 'schemas/user.schema';
         schema: UserSchema
       }
     ]),
-    TodoModule,
-    ShorterModule,
-    TicketingModule,
-    AuthModule,
-    MongooseModule.forRoot(process.env.MONGO_URL),
   ],
   controllers: [AppController],
   providers: [AppService],
