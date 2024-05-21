@@ -47,8 +47,8 @@ export class AuthService {
   async login(email: string, password: string) {
     const findUser = await this.userService.findOneUserByEmail(email);
     if (
-      !findUser.success ||
-      !(await bcrypt.compare(password, findUser.data.password))
+      !findUser?.success ||
+      !(await bcrypt.compare(password, findUser?.data?.password))
     ) {
       return {
         success: false,
